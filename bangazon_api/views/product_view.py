@@ -162,7 +162,8 @@ class ProductView(ViewSet):
         products = Product.objects.all()
 
         number_sold = request.query_params.get('number_sold', None)
-        category = request.query_params.get('category', None)
+        category = request.query_params.get('category', None) 
+        # query_params is a dictionary and will get the category by that id if it is not none
         order = request.query_params.get('order_by', None)
         direction = request.query_params.get('direction', None)
         name = request.query_params.get('name', None)
@@ -178,7 +179,7 @@ class ProductView(ViewSet):
 
         if category is not None:
             products = products.filter(category__id=category)
-
+        # similar to sql above is filtering by category__id
         if name is not None:
             products = products.filter(name__icontains=name)
 
@@ -251,6 +252,7 @@ class ProductView(ViewSet):
             product = Product.objects.get(pk=pk)
             order = Order.objects.get(
                 user=request.auth.user, completed_on=None)
+            order.products.remove(product)
             return Response(None, status=status.HTTP_204_NO_CONTENT)
         except Product.DoesNotExist as ex:
             return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
