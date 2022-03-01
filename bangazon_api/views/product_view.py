@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
 from bangazon_api.helpers import STATE_NAMES
 from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation
 from bangazon_api.serializers import (
@@ -160,18 +161,33 @@ class ProductView(ViewSet):
     def list(self, request):
         """Get a list of all products"""
         products = Product.objects.all()
-
+        
+        location_sold = request.query_params.get('location', None)
         number_sold = request.query_params.get('number_sold', None)
+        min_price = request.query_params.get('price', None)
         category = request.query_params.get('category', None) 
         # query_params is a dictionary and will get the category by that id if it is not none
         order = request.query_params.get('order_by', None)
         direction = request.query_params.get('direction', None)
         name = request.query_params.get('name', None)
+       
 
+        if min_price is not None:
+            products = products.filter(price__gte = min_price)
+        # !this feels like it makes sense?
+            
+            
+                
+        if location_sold is not None:
+            products = products.filter(location = location_sold)
+            
         if number_sold:
             products = products.annotate(
-                order_count=Count('orders')
-            ).filter(order_count__lt=number_sold)
+                order_count=Count('orders',filter=~Q(orders__payment_type = None))
+                # You are then filtering the orders by payment_type
+                # YOu need dunder __ shown on orders, to grab propertys that are added to Models
+                #payment_type is a property of orders.add
+            ).filter(order_count__gte=number_sold)
 
         if order is not None:
             order_filter = f'-{order}' if direction == 'desc' else order
