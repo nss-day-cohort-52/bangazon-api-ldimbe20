@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from bangazon_api.helpers import STATE_NAMES
-from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation
+from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation, Like
 from bangazon_api.serializers import (
     ProductSerializer, CreateProductSerializer, MessageSerializer,
     AddProductRatingSerializer, AddRemoveRecommendationSerializer)
@@ -162,24 +162,20 @@ class ProductView(ViewSet):
         """Get a list of all products"""
         products = Product.objects.all()
         
-        location_sold = request.query_params.get('location', None)
+        location = request.query_params.get('location', None)
         number_sold = request.query_params.get('number_sold', None)
-        min_price = request.query_params.get('price', None)
+        min_price = request.query_params.get('min_price', None)
         category = request.query_params.get('category', None) 
         # query_params is a dictionary and will get the category by that id if it is not none
         order = request.query_params.get('order_by', None)
         direction = request.query_params.get('direction', None)
         name = request.query_params.get('name', None)
        
-
         if min_price is not None:
             products = products.filter(price__gte = min_price)
-        # !this feels like it makes sense?
             
-            
-                
-        if location_sold is not None:
-            products = products.filter(location = location_sold)
+        if location is not None:
+            products = products.filter(location__icontains=(location))
             
         if number_sold:
             products = products.annotate(
@@ -361,3 +357,32 @@ class ProductView(ViewSet):
             )
 
         return Response({'message': 'Rating added'}, status=status.HTTP_201_CREATED)
+
+
+    @action(methods=['post'], detail=True)
+    def like(self, request, pk):
+                """Add a product to the current users open order"""
+                try:
+                    product = Product.objects.get(pk=pk)
+                    #grabbing store by pk
+                    user = request.auth.user
+                    #grabbing user by auth.user
+                    like = Like()
+                    #above is creating a NEW like object and appending items to it see below
+                    like.product_id = product.id
+                    like.customer_id = user.id
+                    like.save()
+                    # save a new like object
+                    return Response({'message': 'Like Added'}, status=status.HTTP_201_CREATED)
+                except Store.DoesNotExist as ex:
+                    return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+                
+    @action(methods=['delete'], detail=True)
+    def unlike(self, request, pk):
+                """Remove a product from the users open order"""
+                try:
+                    like = Like.objects.get(product_id=pk, customer_id=request.auth.user)
+                    like.delete()
+                    return Response({'message': 'You removed as like'}, status=status.HTTP_204_NO_CONTENT)
+                except Store.DoesNotExist as ex:
+                    return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)

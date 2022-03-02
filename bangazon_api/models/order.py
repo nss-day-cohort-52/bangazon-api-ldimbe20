@@ -14,8 +14,9 @@ class Order(models.Model):
 
     @property
     def total(self):
-        return sum([p.price for p in self.products.all()], 0)
+            return sum([p.price for p in self.products.all()], 0)
 
     def __str__(self):
-        is_open = 'Completed' if self.completed_on else 'Open'
-        return f'{is_open} order for {self.user.get_full_name()}'
+            is_open = 'Completed' if self.completed_on else 'Open'
+            return f'{is_open} order for {self.user.get_full_name()}'
+
