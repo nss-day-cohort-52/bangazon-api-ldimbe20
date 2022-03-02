@@ -39,9 +39,11 @@ class OrderTests(APITestCase):
         response = self.client.get('/api/orders')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+        #! what does above 1 mean? length of one?  
 
     def test_delete_order(self):
         response = self.client.delete(f'/api/orders/{self.order1.id}')
+        
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     # TODO: Complete Order test

@@ -7,3 +7,6 @@ class Recommendation(models.Model):
     customer = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="recommendations")
     product = models.ForeignKey("Product", on_delete=models.CASCADE)
+
+# !make sure all related names are also in serializer 
+

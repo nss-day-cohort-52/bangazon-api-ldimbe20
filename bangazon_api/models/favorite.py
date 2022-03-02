@@ -9,3 +9,7 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.store.name} favorited by {self.customer.get_full_name()}'
+  
+
+
+
