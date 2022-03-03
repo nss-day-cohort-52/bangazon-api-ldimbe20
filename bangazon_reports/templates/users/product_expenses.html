@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LevelUp Reports</title>
+  </head>
+  <body>
+    <h1>Items over $500</h1>
+
+    {% for product in productexpense_list %}
+        <h2>{{ product.name }} {{ product.price }}</h2>
+        <ol>
+            {% comment %} below is a for in loop {% endcomment %}
+            {% comment %} {% for event in user.events %}  {% endcomment %}
+            <li>
+                Description of Product: {{ product.description }}
+            </li>
+            
+        </ol>
+    {% endfor %}
+  </body>
+</html>

@@ -82,8 +82,7 @@ class ProductTests(APITestCase):
             Ensure we can delete an existing game.
             """
             product = Product()
-            # store = Store()
-            # Need to create a product to delete
+            # Need to create a product to delete so creating it here
             product.name=self.faker.ecommerce_name()
             product.price=random.randint(50, 1000)
             product.description=self.faker.paragraph()
@@ -94,7 +93,7 @@ class ProductTests(APITestCase):
             product.store_id=1
             
             # 
-            # Define the URL path for deleting an existing Game
+            # Define the URL path for deleting an existing products
             product.save()
             url = f'/api/products/{product.id}'
 
