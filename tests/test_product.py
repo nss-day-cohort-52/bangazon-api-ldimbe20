@@ -9,12 +9,13 @@ from django.contrib.auth.models import User
 from bangazon_api.helpers import STATE_NAMES
 from bangazon_api.models import Category
 from bangazon_api.models.product import Product
+from bangazon_api.models import Store
 
 
 class ProductTests(APITestCase):
     def setUp(self):
         """
-
+       setting up data
         """
         call_command('seed_db', user_count=2)
         self.user1 = User.objects.filter(store__isnull=False).first()
@@ -75,3 +76,38 @@ class ProductTests(APITestCase):
         response = self.client.get('/api/products')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), Product.objects.count())
+
+    def test_delete_product(self):
+            """
+            Ensure we can delete an existing game.
+            """
+            product = Product()
+            # store = Store()
+            # Need to create a product to delete
+            product.name=self.faker.ecommerce_name()
+            product.price=random.randint(50, 1000)
+            product.description=self.faker.paragraph()
+            product.quantity= random.randint(2, 20)
+            product.location= random.choice(STATE_NAMES)
+            product.imagePath= ""
+            product.category_id= 1
+            product.store_id=1
+            
+            # 
+            # Define the URL path for deleting an existing Game
+            product.save()
+            url = f'/api/products/{product.id}'
+
+            # Initiate DELETE request and capture the response
+            response = self.client.delete(url)
+
+            # Assert that the response status code is 204 (NO CONTENT)
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            
+          
+
+            # Initiate GET request and capture the response
+            response = self.client.get(url)
+
+            # Assert that the response status code is 404 (NOT FOUND)
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
